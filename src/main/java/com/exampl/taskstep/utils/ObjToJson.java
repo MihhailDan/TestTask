@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @email: daniljukmihhail@gmail.com
  */
 
-public class StringToJson {
+public class ObjToJson {
 
 
     private ObjectMapper mapper = new ObjectMapper();

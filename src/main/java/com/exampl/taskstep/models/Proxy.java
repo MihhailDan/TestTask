@@ -6,7 +6,6 @@ import javax.persistence.*;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
 
 /**
  * @date: Feb.22.2022
@@ -24,7 +23,7 @@ public class Proxy {
 
 
     @Column(unique = true)
-    @Length(max=120)
+    @Length(max=120, message = "Name is too long")
     @NotBlank
     private String name;
 

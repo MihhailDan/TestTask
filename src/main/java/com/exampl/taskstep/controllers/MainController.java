@@ -3,21 +3,22 @@ package com.exampl.taskstep.controllers;
 import com.exampl.taskstep.models.Proxy;
 import com.exampl.taskstep.models.ProxyType;
 import com.exampl.taskstep.repos.ProxyRepository;
-import com.exampl.taskstep.utils.StringToJson;
+import com.exampl.taskstep.utils.ObjToJson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
-import java.util.List;
+import java.sql.SQLException;
 import java.util.Optional;
 
+import static java.util.Optional.empty;
 import static org.springframework.http.ResponseEntity.status;
 
 /**
@@ -36,14 +37,20 @@ public class MainController {
 
 
     // Creating object of utility class that has methods to convert Proxy object into string, for convenient representation
-    private StringToJson converter = new StringToJson();
+    private final ObjToJson converter = new ObjToJson();
+
+
+    @ExceptionHandler({ConstraintViolationException.class, SQLException.class})
+    public ResponseEntity<String> formValidation(Exception e) {
+        return status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
 
 
     // Mapping GET http method to return all the proxies that are in DB.
     @GetMapping
     public ResponseEntity<String> gatAllWithoutPaging() {
         Iterable<Proxy> proxies = proxyRepository.findAll();
-        if (proxies.equals(Optional.empty())) {
+        if (proxies.equals(empty())) {
             return status(HttpStatus.BAD_REQUEST).body("There is no elements in DB");
         }
         return status(HttpStatus.OK).body(converter.listToJsonString(proxies));
@@ -61,7 +68,7 @@ public class MainController {
     // Returns Proxy entry by Id, if it appears to be in DB, otherwise null, or empty sheet.
     @GetMapping("/{id}")
     public ResponseEntity<String> getById(@PathVariable long id) {
-        if (proxyRepository.existsById(id)) {
+        if (!(proxyRepository.findById(id).equals(Optional.empty()))) {
         return status(HttpStatus.OK).body(converter.convToJson(proxyRepository.findById(id).orElse(null)));
        }
         return status(HttpStatus.BAD_REQUEST).body("There is no proxy with such id");
@@ -93,11 +100,10 @@ public class MainController {
     // Updates Proxy entry provided by id with new information.
     @PutMapping("/{id}")
     public ResponseEntity<String> editProxy(@PathVariable long id, @Valid @RequestBody Proxy proxy) {
-        if (proxyRepository.existsById(id)) {
-            Proxy oldProxy = proxyRepository.findById(id).orElse(null);
+        if (!proxyRepository.findById(id).equals(Optional.empty())) {
             proxy.setId(id);
             proxyRepository.save(proxy);
-            return status(HttpStatus.OK).body(converter.convToJson(oldProxy) + "\nproxy is updated to: \n"
+            return status(HttpStatus.ACCEPTED).body("Proxy is updated to:\n"
                     + converter.convToJson(proxy));
         }
         return status(HttpStatus.BAD_REQUEST).body("There is no proxy with this ID");
@@ -107,10 +113,10 @@ public class MainController {
     // Deletes Proxy entry in DB if provided id is valid. No check for valid ID!.
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteProxy(@PathVariable long id) {
-        if (proxyRepository.existsById(id)) {
+        if (!(proxyRepository.findById(id).equals(Optional.empty()))) {
             Proxy proxy = proxyRepository.findById(id).orElse(null);
             proxyRepository.deleteById(id);
-            return ResponseEntity.ok(converter.convToJson(proxy) + "\nProxy deleted");
+            return ResponseEntity.ok(converter.convToJson(proxy) + " Proxy deleted");
         }
         return ResponseEntity.badRequest().body("There is no proxy with such ID");
     }
