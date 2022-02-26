@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
 
@@ -36,6 +37,11 @@ public class PostMappingTest {
 
     private ObjToJson converter = new ObjToJson();
 
+    @Test
+    void shouldCreateMockMvc() {
+        assertThat(mockMvc).isNotNull();
+    }
+
 
     @Test
     void postMethodReturnsAddedProxyTest() throws Exception {
@@ -51,4 +57,18 @@ public class PostMappingTest {
                 .andExpect(MockMvcResultMatchers.content().string(converter.convToJson(proxy) + " Proxy added"));
         verify(proxyRepository).save(any(Proxy.class));
     }
+
+
+    @Test
+    void postMethodThrowsExceptionsTest() throws  Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/proxies")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Testname\",\"type\":\"HTTP\",\"hostname\":\"TestHostname\",\"port\":8080" +
+                                ",\"username\":\"TestUsername\",\"password\":\"123\",\"active\":true}"))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.content().string("newProxy.proxy.password: Wrong password"));
+    }
+
+
+
 }

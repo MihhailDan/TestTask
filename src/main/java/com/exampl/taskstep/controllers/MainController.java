@@ -18,7 +18,6 @@ import javax.validation.Valid;
 import java.sql.SQLException;
 import java.util.Optional;
 
-import static java.util.Optional.empty;
 import static org.springframework.http.ResponseEntity.status;
 
 /**
@@ -50,7 +49,7 @@ public class MainController {
     @GetMapping
     public ResponseEntity<String> gatAllWithoutPaging() {
         Iterable<Proxy> proxies = proxyRepository.findAll();
-        if (proxies.equals(empty())) {
+        if (proxyRepository.findAll().toString() == "[]") {
             return status(HttpStatus.BAD_REQUEST).body("There is no elements in DB");
         }
         return status(HttpStatus.OK).body(converter.listToJsonString(proxies));
@@ -59,9 +58,9 @@ public class MainController {
 
     // Mapping GET http method to endpoint "/proxies/{pagenum}/{pagesize}", returns all the entries in DB with pagination
     @GetMapping("/{pageNum}/{pageSize}")
-    public ResponseEntity<Iterable<Proxy>> getAll(@PathVariable int pageNum, @PathVariable int pageSize) {
+    public ResponseEntity<String> getAll(@PathVariable int pageNum, @PathVariable int pageSize) {
         Pageable paging = PageRequest.of(pageNum,pageSize);
-        return status(HttpStatus.OK).body(proxyRepository.findAll(paging));
+        return status(HttpStatus.OK).body(converter.listToJsonString(proxyRepository.findAll(paging)));
     }
 
 
@@ -78,8 +77,8 @@ public class MainController {
     // Returns Proxy entry filtered by name and type, if it appears in DB, otherwise null, or empty sheet
     @GetMapping("/get/{name}/{type}")
     public ResponseEntity<String> getByNameAndType(@PathVariable String name, @PathVariable ProxyType type) {
-        if (proxyRepository.existsByNameAndType(name, type)) {
-            Proxy proxy = proxyRepository.findByNameAndType(name, type);
+        if (!(proxyRepository.findByNameAndType(name, type).equals(Optional.empty()))) {
+            Proxy proxy = proxyRepository.findByNameAndType(name, type).orElse(null);
             return status(HttpStatus.OK).body(converter.convToJson(proxy));
         }
         return status(HttpStatus.BAD_REQUEST).body("There is no proxy with these name and type parameters");

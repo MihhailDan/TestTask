@@ -6,6 +6,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
+import javax.swing.text.html.Option;
+import java.nio.file.OpenOption;
+import java.util.Optional;
+
 /**
  * @date: Feb.22.2022
  * @author: Mihhail Daniljuk
@@ -16,8 +20,6 @@ import org.springframework.stereotype.Repository;
 public interface ProxyRepository extends PagingAndSortingRepository<Proxy, Long> {
 
     @Query("select p from Proxy p where p.name = ?1 and p.type = ?2")
-    public Proxy findByNameAndType(String name, ProxyType type);
+    public Optional<Proxy> findByNameAndType(String name, ProxyType type);
 
-
-    public boolean existsByNameAndType(String name, ProxyType type);
 }

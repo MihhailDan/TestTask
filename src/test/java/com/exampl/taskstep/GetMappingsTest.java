@@ -18,7 +18,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 /**
  * @date: Feb.25.2022
@@ -66,5 +67,37 @@ public class GetMappingsTest {
         this.mockMvc.perform(MockMvcRequestBuilders.get("/proxies/0"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().string(converter.convToJson(proxy)));
+
+        verify(proxyRepository, times(2)).findById(any(Long.class));
+    }
+
+    @Test
+    void getProxyByNameAndTypeTest() throws  Exception {
+        Proxy proxy = new Proxy(0,"Testname", ProxyType.HTTP, "TestHostname", 8080,
+                "TestUsername", "password", true);
+
+        Proxy proxy2 = new Proxy(0,"Testname2", ProxyType.HTTPS, "TestHostname2", 8080,
+                "TestUsername2", "password", true);
+
+        when(proxyRepository.findByNameAndType("Testname", ProxyType.HTTP)).thenReturn(Optional.of(proxy));
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/proxies")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"Testname\",\"type\":\"HTTP\",\"hostname\":\"TestHostname\",\"port\":8080" +
+                        ",\"username\":\"TestUsername\",\"password\":\"password\",\"active\":true}"));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/proxies/get/{name}/{type}", "Testname", "HTTP"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().string(converter.convToJson(proxy)));
+
+
+        // verify(proxyRepository).findByNameAndType(any(String.class), any(ProxyType.class));
+    }
+
+    @Test
+    void getProxyByNameAndTypeFailsTest() throws  Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/proxies/get/abc/HTTP"))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.content().string("There is no proxy with these name and type parameters"));
     }
 }

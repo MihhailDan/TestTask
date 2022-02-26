@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.when;
 
 /**
@@ -36,6 +37,11 @@ public class PutMappingTest {
     private ProxyRepository proxyRepository;
 
     private ObjToJson converter = new ObjToJson();
+
+    @Test
+    void shouldCreateMockMvc() {
+        assertThat(mockMvc).isNotNull();
+    }
 
 
     @Test

@@ -17,6 +17,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -39,6 +42,11 @@ public class DeleteMappingTest {
     private ObjToJson converter = new ObjToJson();
 
     @Test
+    void shouldCreateMockMvc() {
+        assertThat(mockMvc).isNotNull();
+    }
+
+    @Test
     void deleteEmptyProxyReturnsBadRequestTest() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.delete("/proxies/{id}", 10))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
@@ -59,9 +67,10 @@ public class DeleteMappingTest {
                         ",\"username\":\"TestUsername\",\"password\":\"password\",\"active\":true}"));
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/proxies/{id}", 0)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().string( converter.convToJson(proxy) + " Proxy deleted"));
+
+        verify(proxyRepository).deleteById(any(Long.class));
     }
 }
