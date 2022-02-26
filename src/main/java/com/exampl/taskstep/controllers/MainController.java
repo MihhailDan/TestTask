@@ -35,17 +35,18 @@ public class MainController {
     private ProxyRepository proxyRepository;
 
 
-    // Creating object of utility class that has methods to convert Proxy object into string, for convenient representation
+    // Creating object of utility class that has methods to convert Proxy object into json format string, for convenient representation
     private final ObjToJson converter = new ObjToJson();
 
 
+    // Exception handler to catch server-side exceptions to show user proper error message
     @ExceptionHandler({ConstraintViolationException.class, SQLException.class})
     public ResponseEntity<String> formValidation(Exception e) {
         return status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 
 
-    // Mapping GET http method to return all the proxies that are in DB.
+    // Mapping GET http method to return all the proxies that are in DB without pagination.
     @GetMapping
     public ResponseEntity<String> gatAllWithoutPaging() {
         Iterable<Proxy> proxies = proxyRepository.findAll();
@@ -56,7 +57,7 @@ public class MainController {
     }
 
 
-    // Mapping GET http method to endpoint "/proxies/{pagenum}/{pagesize}", returns all the entries in DB with pagination
+    // Mapping GET http method to return all the entries in DB with pagination provided by user in URL link
     @GetMapping("/{pageNum}/{pageSize}")
     public ResponseEntity<String> getAll(@PathVariable int pageNum, @PathVariable int pageSize) {
         Pageable paging = PageRequest.of(pageNum,pageSize);
@@ -64,7 +65,7 @@ public class MainController {
     }
 
 
-    // Returns Proxy entry by Id, if it appears to be in DB, otherwise null, or empty sheet.
+    // Returns Proxy entry by Id, if it appears to be in DB.
     @GetMapping("/{id}")
     public ResponseEntity<String> getById(@PathVariable long id) {
         if (!(proxyRepository.findById(id).equals(Optional.empty()))) {
@@ -74,7 +75,7 @@ public class MainController {
     }
 
 
-    // Returns Proxy entry filtered by name and type, if it appears in DB, otherwise null, or empty sheet
+    // Returns Proxy entry filtered by name and type, if it appears in DB
     @GetMapping("/get/{name}/{type}")
     public ResponseEntity<String> getByNameAndType(@PathVariable String name, @PathVariable ProxyType type) {
         if (!(proxyRepository.findByNameAndType(name, type).equals(Optional.empty()))) {
@@ -85,11 +86,11 @@ public class MainController {
     }
 
 
-    // Mapping POST http method to endpoint "/proxies", adding proxy entry if provided data is valid
+    // Mapping POST http method to add proxy entry if provided data is valid
     @PostMapping()
     public ResponseEntity<String> newProxy(@Valid @RequestBody Proxy proxy, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            return status(HttpStatus.BAD_REQUEST).body("Bad arguments");
+            return status(HttpStatus.BAD_REQUEST).body(bindingResult.toString());
         }
         proxyRepository.save(proxy);
         return status(HttpStatus.CREATED).body(converter.convToJson(proxy) + " Proxy added");
@@ -98,18 +99,21 @@ public class MainController {
 
     // Updates Proxy entry provided by id with new information.
     @PutMapping("/{id}")
-    public ResponseEntity<String> editProxy(@PathVariable long id, @Valid @RequestBody Proxy proxy) {
+    public ResponseEntity<String> editProxy(@PathVariable long id, @Valid @RequestBody Proxy proxy, BindingResult bindingResult) {
         if (!proxyRepository.findById(id).equals(Optional.empty())) {
             proxy.setId(id);
             proxyRepository.save(proxy);
             return status(HttpStatus.ACCEPTED).body("Proxy is updated to:\n"
                     + converter.convToJson(proxy));
         }
+        else if (bindingResult.hasErrors()) {
+            return status(HttpStatus.BAD_REQUEST).body(bindingResult.toString());
+        }
         return status(HttpStatus.BAD_REQUEST).body("There is no proxy with this ID");
     }
 
 
-    // Deletes Proxy entry in DB if provided id is valid. No check for valid ID!.
+    // Deletes Proxy entry in DB if provided id is valid.
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteProxy(@PathVariable long id) {
         if (!(proxyRepository.findById(id).equals(Optional.empty()))) {

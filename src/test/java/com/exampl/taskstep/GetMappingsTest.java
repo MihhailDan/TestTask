@@ -52,7 +52,7 @@ public class GetMappingsTest {
     }
 
     @Test
-    void getProxyReturnsOkAndProxyTest() throws Exception {
+    void getProxyReturnsProxyTest() throws Exception {
         Proxy proxy = new Proxy(0,"Testname", ProxyType.HTTP, "TestHostname", 8080,
                 "TestUsername", "password", true);
 
@@ -89,9 +89,6 @@ public class GetMappingsTest {
         mockMvc.perform(MockMvcRequestBuilders.get("/proxies/get/{name}/{type}", "Testname", "HTTP"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().string(converter.convToJson(proxy)));
-
-
-        // verify(proxyRepository).findByNameAndType(any(String.class), any(ProxyType.class));
     }
 
     @Test

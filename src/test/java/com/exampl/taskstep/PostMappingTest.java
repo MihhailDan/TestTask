@@ -45,10 +45,12 @@ public class PostMappingTest {
 
     @Test
     void postMethodReturnsAddedProxyTest() throws Exception {
+
+        // Reference proxy object
         Proxy proxy = new Proxy(0,"Testname", ProxyType.HTTP, "TestHostname", 8080,
                            "TestUsername", "password", true);
 
-
+        // Adding new proxy to the DB
         this.mockMvc.perform(MockMvcRequestBuilders.post("/proxies")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"Testname\",\"type\":\"HTTP\",\"hostname\":\"TestHostname\",\"port\":8080" +
@@ -61,12 +63,14 @@ public class PostMappingTest {
 
     @Test
     void postMethodThrowsExceptionsTest() throws  Exception {
+
+        // Trying to add proxy with invalid form
         this.mockMvc.perform(MockMvcRequestBuilders.post("/proxies")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"Testname\",\"type\":\"HTTP\",\"hostname\":\"TestHostname\",\"port\":8080" +
                                 ",\"username\":\"TestUsername\",\"password\":\"123\",\"active\":true}"))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.content().string("newProxy.proxy.password: Wrong password"));
+                .andExpect(MockMvcResultMatchers.content().string("newProxy.proxy.password: Password length 6...30"));
     }
 
 

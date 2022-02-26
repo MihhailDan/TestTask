@@ -38,8 +38,6 @@ public class Proxy {
     private String hostname;
 
 
-    @Min(value = 1000, message = "Port is a 4 digit positive number")
-    @Max(value = 9999, message = "Port is a 4 digit positive number")
     private int port;
 
 
@@ -48,7 +46,7 @@ public class Proxy {
     private String username;
 
 
-    @Length(min=6, max=30, message = "Wrong password")
+    @Length(min=6, max=30, message = "Password length 6...30")
     private String password;
 
     private boolean active;

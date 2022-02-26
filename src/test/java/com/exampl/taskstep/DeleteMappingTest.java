@@ -41,6 +41,7 @@ public class DeleteMappingTest {
 
     private ObjToJson converter = new ObjToJson();
 
+
     @Test
     void shouldCreateMockMvc() {
         assertThat(mockMvc).isNotNull();
@@ -48,6 +49,8 @@ public class DeleteMappingTest {
 
     @Test
     void deleteEmptyProxyReturnsBadRequestTest() throws Exception {
+
+        // Trying to delete non-existent proxy
         mockMvc.perform(MockMvcRequestBuilders.delete("/proxies/{id}", 10))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.content().string("There is no proxy with such ID"));
@@ -58,14 +61,16 @@ public class DeleteMappingTest {
         Proxy proxy = new Proxy(0,"Testname", ProxyType.HTTP, "TestHostname", 8080,
                 "TestUsername", "password", true);
 
-        // ?
+        // This is rather question, without this line of code test is not passed, ServerResponse 400 instead of 200.
         when(proxyRepository.findById(0l)).thenReturn(Optional.of(proxy));
 
+        // Adding proxy to the DB
         mockMvc.perform(MockMvcRequestBuilders.post("/proxies")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\":\"Testname\",\"type\":\"HTTP\",\"hostname\":\"TestHostname\",\"port\":8080" +
                         ",\"username\":\"TestUsername\",\"password\":\"password\",\"active\":true}"));
 
+        // Deleting proxy from DB
         mockMvc.perform(MockMvcRequestBuilders.delete("/proxies/{id}", 0)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
