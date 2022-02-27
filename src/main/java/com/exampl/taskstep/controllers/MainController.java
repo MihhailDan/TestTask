@@ -5,6 +5,7 @@ import com.exampl.taskstep.models.ProxyType;
 import com.exampl.taskstep.repos.ProxyRepository;
 import com.exampl.taskstep.utils.ObjToJson;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -61,15 +62,20 @@ public class MainController {
     @GetMapping("/{pageNum}/{pageSize}")
     public ResponseEntity<String> getAll(@PathVariable int pageNum, @PathVariable int pageSize) {
         Pageable paging = PageRequest.of(pageNum,pageSize);
-        return status(HttpStatus.OK).body(converter.listToJsonString(proxyRepository.findAll(paging)));
+        Page<Proxy> proxies = proxyRepository.findAll(paging);
+        if (proxies.toString() == "[]") {
+            return status(HttpStatus.BAD_REQUEST).body("There is no elements in DB");
+        }
+        return status(HttpStatus.OK).body(converter.listToJsonString(proxies));
     }
 
 
     // Returns Proxy entry by Id, if it appears to be in DB.
     @GetMapping("/{id}")
     public ResponseEntity<String> getById(@PathVariable long id) {
-        if (!(proxyRepository.findById(id).equals(Optional.empty()))) {
-        return status(HttpStatus.OK).body(converter.convToJson(proxyRepository.findById(id).orElse(null)));
+        Optional<Proxy> proxy = proxyRepository.findById(id);
+        if (!(proxy.equals(Optional.empty()))) {
+        return status(HttpStatus.OK).body(converter.convToJson(proxy.orElse(null)));
        }
         return status(HttpStatus.BAD_REQUEST).body("There is no proxy with such id");
     }
@@ -78,9 +84,9 @@ public class MainController {
     // Returns Proxy entry filtered by name and type, if it appears in DB
     @GetMapping("/get/{name}/{type}")
     public ResponseEntity<String> getByNameAndType(@PathVariable String name, @PathVariable ProxyType type) {
-        if (!(proxyRepository.findByNameAndType(name, type).equals(Optional.empty()))) {
-            Proxy proxy = proxyRepository.findByNameAndType(name, type).orElse(null);
-            return status(HttpStatus.OK).body(converter.convToJson(proxy));
+        Optional<Proxy> proxy = proxyRepository.findByNameAndType(name, type);
+        if (!(proxy.equals(Optional.empty()))) {
+            return status(HttpStatus.OK).body(converter.convToJson(proxy.orElse(null)));
         }
         return status(HttpStatus.BAD_REQUEST).body("There is no proxy with these name and type parameters");
     }
@@ -103,8 +109,7 @@ public class MainController {
         if (!proxyRepository.findById(id).equals(Optional.empty())) {
             proxy.setId(id);
             proxyRepository.save(proxy);
-            return status(HttpStatus.ACCEPTED).body("Proxy is updated to:\n"
-                    + converter.convToJson(proxy));
+            return status(HttpStatus.ACCEPTED).body("Proxy is updated to:\n" + converter.convToJson(proxy));
         }
         else if (bindingResult.hasErrors()) {
             return status(HttpStatus.BAD_REQUEST).body(bindingResult.toString());
@@ -116,10 +121,10 @@ public class MainController {
     // Deletes Proxy entry in DB if provided id is valid.
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteProxy(@PathVariable long id) {
-        if (!(proxyRepository.findById(id).equals(Optional.empty()))) {
-            Proxy proxy = proxyRepository.findById(id).orElse(null);
+        Optional<Proxy> proxy = proxyRepository.findById(id);
+        if (!(proxy.equals(Optional.empty()))) {
             proxyRepository.deleteById(id);
-            return ResponseEntity.ok(converter.convToJson(proxy) + " Proxy deleted");
+            return ResponseEntity.ok(converter.convToJson(proxy.orElse(null)) + " Proxy deleted");
         }
         return ResponseEntity.badRequest().body("There is no proxy with such ID");
     }

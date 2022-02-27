@@ -71,6 +71,7 @@ public class PostMappingTest {
                                 ",\"username\":\"TestUsername\",\"password\":\"123\",\"active\":true}"))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.content().string("newProxy.proxy.password: Password length 6...30"));
+
     }
 
 

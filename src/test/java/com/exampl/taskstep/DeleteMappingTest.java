@@ -18,7 +18,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -51,9 +50,10 @@ public class DeleteMappingTest {
     void deleteEmptyProxyReturnsBadRequestTest() throws Exception {
 
         // Trying to delete non-existent proxy
-        mockMvc.perform(MockMvcRequestBuilders.delete("/proxies/{id}", 10))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/proxies/{id}", 1))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.content().string("There is no proxy with such ID"));
+        verify(proxyRepository).findById(1l);
     }
 
     @Test
@@ -76,6 +76,7 @@ public class DeleteMappingTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().string( converter.convToJson(proxy) + " Proxy deleted"));
 
-        verify(proxyRepository).deleteById(any(Long.class));
+        verify(proxyRepository).deleteById(0l);
+        verify(proxyRepository).findById(0l);
     }
 }

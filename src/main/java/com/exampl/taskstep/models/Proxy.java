@@ -3,8 +3,6 @@ package com.exampl.taskstep.models;
 import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 
 /**
@@ -65,6 +63,8 @@ public class Proxy {
         this.password = password;
         this.active = active;
     }
+
+
 
 
     public long getId() {
