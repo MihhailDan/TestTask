@@ -1,0 +1,13 @@
+version: '3'
+services:
+
+  postgres:
+    environment:
+    - DB_NAME=testTask
+    - POSTGRES_PASSWORD=123
+    image: 'postgres:14.2-alpine'
+    ports:
+    - 5432:5432
+    restart: always
+    volumes:
+    - ./pgdb:/var/lib/postgresql/data
