@@ -51,7 +51,7 @@ public class MainController {
     @GetMapping
     public ResponseEntity<String> gatAllWithoutPaging() {
         Iterable<Proxy> proxies = proxyRepository.findAll();
-        if (proxyRepository.findAll().toString() == "[]") {
+        if (proxies.toString() == "[]") {
             return status(HttpStatus.BAD_REQUEST).body("There is no elements in DB");
         }
         return status(HttpStatus.OK).body(converter.listToJsonString(proxies));
