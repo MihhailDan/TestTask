@@ -61,6 +61,9 @@ public class MainController {
     // Mapping GET http method to return all the entries in DB with pagination provided by user in URL link
     @GetMapping("/{pageNum}/{pageSize}")
     public ResponseEntity<String> getAll(@PathVariable int pageNum, @PathVariable int pageSize) {
+        if (pageSize <= 0 || pageNum < 0) {
+            return status(HttpStatus.BAD_REQUEST).body("Page size should be positive and page number can't be negative");
+        }
         Pageable paging = PageRequest.of(pageNum,pageSize);
         Page<Proxy> proxies = proxyRepository.findAll(paging);
         if (!proxies.hasContent()) {

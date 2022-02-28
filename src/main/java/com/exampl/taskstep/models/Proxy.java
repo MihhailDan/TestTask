@@ -22,7 +22,7 @@ public class Proxy {
 
     @Column(unique = true)
     @Length(max=120, message = "Name is too long")
-    @NotBlank
+    @NotBlank(message = "Name can't be empty")
     private String name;
 
 
@@ -32,14 +32,14 @@ public class Proxy {
 
     @Column(unique = true)
     @Length(max=120)
-    @NotBlank
+    @NotBlank(message = "Hostname can't be empty")
     private String hostname;
 
 
     private int port;
 
 
-    @NotBlank
+    @NotBlank(message = "Username can't be empty")
     @Length(max = 30, message = "Username can't be longer than 30 characters")
     private String username;
 
