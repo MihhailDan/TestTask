@@ -52,7 +52,7 @@ public class DeleteMappingTest {
         // Trying to delete non-existent proxy
         mockMvc.perform(MockMvcRequestBuilders.delete("/proxies/{id}", 1))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.content().string("There is no proxy with such ID"));
+                .andExpect(MockMvcResultMatchers.content().string("There is no proxy with such Id"));
         verify(proxyRepository).findById(1l);
     }
 

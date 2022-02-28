@@ -51,12 +51,13 @@ public class PostMappingTest {
                            "TestUsername", "password", true);
 
         // Adding new proxy to the DB
-        this.mockMvc.perform(MockMvcRequestBuilders.post("/proxies")
+        mockMvc.perform(MockMvcRequestBuilders.post("/proxies")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"Testname\",\"type\":\"HTTP\",\"hostname\":\"TestHostname\",\"port\":8080" +
                                 ",\"username\":\"TestUsername\",\"password\":\"password\",\"active\":true}"))
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.content().string(converter.convToJson(proxy) + " Proxy added"));
+
         verify(proxyRepository).save(any(Proxy.class));
     }
 
@@ -65,7 +66,7 @@ public class PostMappingTest {
     void postMethodThrowsExceptionsTest() throws  Exception {
 
         // Trying to add proxy with invalid form
-        this.mockMvc.perform(MockMvcRequestBuilders.post("/proxies")
+        mockMvc.perform(MockMvcRequestBuilders.post("/proxies")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"Testname\",\"type\":\"HTTP\",\"hostname\":\"TestHostname\",\"port\":8080" +
                                 ",\"username\":\"TestUsername\",\"password\":\"123\",\"active\":true}"))

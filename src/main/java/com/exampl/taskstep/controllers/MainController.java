@@ -49,10 +49,10 @@ public class MainController {
 
     // Mapping GET http method to return all the proxies that are in DB without pagination.
     @GetMapping
-    public ResponseEntity<String> gatAllWithoutPaging() {
+    public ResponseEntity<String> getAllWithoutPagination() {
         Iterable<Proxy> proxies = proxyRepository.findAll();
         if (proxies.toString() == "[]") {
-            return status(HttpStatus.BAD_REQUEST).body("There is no elements in DB");
+            return status(HttpStatus.BAD_REQUEST).body("There are no elements in DB");
         }
         return status(HttpStatus.OK).body(converter.listToJsonString(proxies));
     }
@@ -63,8 +63,8 @@ public class MainController {
     public ResponseEntity<String> getAll(@PathVariable int pageNum, @PathVariable int pageSize) {
         Pageable paging = PageRequest.of(pageNum,pageSize);
         Page<Proxy> proxies = proxyRepository.findAll(paging);
-        if (proxies.toString() == "[]") {
-            return status(HttpStatus.BAD_REQUEST).body("There is no elements in DB");
+        if (!proxies.hasContent()) {
+            return status(HttpStatus.BAD_REQUEST).body("This page is empty");
         }
         return status(HttpStatus.OK).body(converter.listToJsonString(proxies));
     }
@@ -114,7 +114,7 @@ public class MainController {
         else if (bindingResult.hasErrors()) {
             return status(HttpStatus.BAD_REQUEST).body(bindingResult.toString());
         }
-        return status(HttpStatus.BAD_REQUEST).body("There is no proxy with this ID");
+        return status(HttpStatus.BAD_REQUEST).body("There is no proxy with such Id");
     }
 
 
@@ -126,6 +126,6 @@ public class MainController {
             proxyRepository.deleteById(id);
             return ResponseEntity.ok(converter.convToJson(proxy.orElse(null)) + " Proxy deleted");
         }
-        return ResponseEntity.badRequest().body("There is no proxy with such ID");
+        return ResponseEntity.badRequest().body("There is no proxy with such Id");
     }
 }

@@ -49,13 +49,12 @@ public class PutMappingTest {
         Proxy proxy = new Proxy(0,"Testname", ProxyType.HTTP, "TestHostname", 8080,
                 "TestUsername", "password", true);
 
-
         mockMvc.perform(MockMvcRequestBuilders.put("/proxies/{id}", "0")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"Testname\",\"type\":\"HTTP\",\"hostname\":\"TestHostname\",\"port\":8080" +
                                 ",\"username\":\"TestUsername\",\"password\":\"password\",\"active\":true}"))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.content().string("There is no proxy with this ID"));
+                .andExpect(MockMvcResultMatchers.content().string("There is no proxy with such Id"));
         verify(proxyRepository).findById(0l);
     }
 
@@ -64,8 +63,6 @@ public class PutMappingTest {
     void putMappingUpdatesProxy() throws Exception {
         Proxy proxy = new Proxy(0,"ChangedName", ProxyType.HTTPS, "ChangedHostname", 9090,
                 "ChangedUsername", "NewPassword", false);
-        Proxy proxy2 = new Proxy(0,"Testname", ProxyType.HTTP, "TestHostname", 8080,
-                "TestUsername", "password", true);
 
         when(proxyRepository.findById(0l)).thenReturn(Optional.of(proxy));
 
@@ -73,8 +70,6 @@ public class PutMappingTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\":\"Testname\",\"type\":\"HTTP\",\"hostname\":\"TestHostname\",\"port\":8080" +
                         ",\"username\":\"TestUsername\",\"password\":\"password\",\"active\":true}"));
-
-
 
         mockMvc.perform(MockMvcRequestBuilders.put("/proxies/{id}", "0")
                 .contentType(MediaType.APPLICATION_JSON)
